@@ -2,3 +2,7 @@ name = "F_utilities"
 uuid = "01aa7807-3cfa-4ee3-a29f-5a7aac97f223"
 authors = ["Jacupo <Jacupo@users.noreply.github.com>"]
 version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
