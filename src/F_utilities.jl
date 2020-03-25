@@ -9,6 +9,7 @@ function Print_matrix(title, matrix)
  colorbar()
  ylim(size(matrix,1),0)
 end
+export Print_matrix;
 
 function Build_Omega(N)
 #Build the matrix omega of dimension 2*N, that is for N sites.
@@ -20,6 +21,7 @@ function Build_Omega(N)
   Ω[(1:N).+N,(1:N).+N]  = Diagonal(-im*ν*ones(N));
   return Ω;
 end
+export Build_Omega;
 
 function Build_FxxTxp(N)
  FxxTxp = zeros(Int64, 2*N, 2*N);
@@ -29,6 +31,7 @@ function Build_FxxTxp(N)
  end
  return FxxTxp;
 end
+export Build_FxxTxp;
 
 function Build_FxpTxx(N)
  FxpTxx = zeros(Int64, 2*N, 2*N)
@@ -38,6 +41,7 @@ function Build_FxpTxx(N)
  end
  return FxpTxx;
 end
+export Build_FxpTxx;
 
 function Diag_real_skew(M, rand_perturbation::Int64=0)
  N = div(size(M,1),2);
@@ -110,6 +114,8 @@ function Diag_real_skew(M, rand_perturbation::Int64=0)
 
  return M_f, O_f;
 end
+export Diag_real_skew;
+
 
 function Diag_h(M,rand_perturbation::Int64=0)
     N = div(size(M,1),2);
@@ -130,7 +136,7 @@ function Diag_h(M,rand_perturbation::Int64=0)
 
     return real(M_f), U_f;
 end
-
+export Diag_h;
 
 function Diag_gamma(Γ,rand_perturbation::Int64=0)
  Γ = (Γ+Γ')/2.;
@@ -138,7 +144,7 @@ function Diag_gamma(Γ,rand_perturbation::Int64=0)
 
  return U'*Γ*U,U;#real(γ+0.5*eye(size(Γ,1))),U
 end
-
+export Diag_gamma;
 
 
 function Reduce_gamma(M, N_partition, first_index)
@@ -175,7 +181,7 @@ function Reduce_gamma(M, N_partition, first_index)
 
    return redgamma
 end
-
+export Reduce_gamma;
 
 
 function Eigenvalues_of_rho(M)
@@ -198,6 +204,7 @@ function Eigenvalues_of_rho(M)
 
    return evor;
 end
+export Eigenvalues_of_rho;
 
 
 function VN_entropy(M)
@@ -215,7 +222,7 @@ function VN_entropy(M)
 
    return S;
 end
-
+export VN_entropy;
 
 
 function Purity(M)
@@ -231,6 +238,7 @@ function Purity(M)
 
    return purity
 end
+export Purity;
 
 function Contour(Γ)
   N = div(size(Γ,1),2);
@@ -266,9 +274,8 @@ function Contour(Γ)
   end
 
   return Ent_Cont;
-
 end
-
+export Contour;
 
 function GS_gamma(D,U)
    N = div(size(D,1),2);
@@ -282,7 +289,7 @@ function GS_gamma(D,U)
    Gamma = (Gamma+(Gamma'))/2.
    return Gamma;
 end
-
+export GS_gamma;
 
 function Thermal_fix_beta((Diag_H, U_H), beta)
  N_f   = convert(Int64, size(Diag_H,1)/2.);
@@ -298,7 +305,7 @@ function Thermal_fix_beta((Diag_H, U_H), beta)
 
  return gamma;
 end
-
+export Thermal_fix_beta;
 
 
 function Thermal_fix_energy((Diag_H, U_H,), conserved_energy)
@@ -336,6 +343,7 @@ function Thermal_fix_energy((Diag_H, U_H,), conserved_energy)
 
  return gamma, beta, abs(temp_energy-conserved_energy);
 end
+export Thermal_fix_energy;
 
 
 #Generate a random Hamiltonian with just nearest neighbour interactions
@@ -354,6 +362,7 @@ function Random_NNhamiltonian(N)
 
     return H;
 end
+export Random_NNhamiltonian;
 
 function Energy(Γ,(D,U))
    N_f = convert(Int64, size(Γ,1)/2.);
@@ -369,7 +378,7 @@ function Energy(Γ,(D,U))
 
    return real(energy);
 end
-
+export Energy;
 
 function Evolve(M,(D,U),t)
    N = div(size(M,1),2);
@@ -384,7 +393,7 @@ function Evolve(M,(D,U),t)
 
    return M_evolv;
 end
-
+export Evolve;
 
 function Product(Γ1,Γ2)
   N = div(size(Γ1, 1),2);
@@ -395,7 +404,7 @@ function Product(Γ1,Γ2)
   γp = I-(I-γ2)*inv(I+γ1*γ2)*(I-γ1);
   return (Ω'*(1/2)*(γp+I)*Ω);
 end
-
+export Product;
 
 
 function Evolve_imag(Γ,D,U,t)
@@ -409,6 +418,7 @@ function Evolve_imag(Γ,D,U,t)
 
    return Γ_evolv;
 end
+export Evolve_imag;
 
 
 function Build_hopping_hamiltonian(N,PBC=false);
@@ -424,7 +434,7 @@ function Build_hopping_hamiltonian(N,PBC=false);
 
   return H;
 end
-
+export Build_hopping_hamiltonian;
 
 function Build_Fourier_matrix(N)
   ω   = exp(-im*2*pi/N);
@@ -441,5 +451,6 @@ function Build_Fourier_matrix(N)
 
   return U_ω;
 end
+export Build_Fourier_matrix;
 
 end
