@@ -475,11 +475,11 @@ export Build_hopping_hamiltonian;
 
 function Build_Fourier_matrix(N)
   ω   = exp(-im*2*pi/N);
-  W   = zeros(Complex{Float64}, N, N);
+  W   = ones(Complex{Float64}, N, N);
   U_ω = zeros(Complex{Float64}, 2*N, 2*N);
-  for i=0:(N-1)
-    for j=0:(N-1)
-      W[i+1,j+1] = ω^(i*j);
+  for i=1:(N-1)
+    for j=1:(N-1)
+      W[i,j] = ω^(i*j);
     end
   end
   W = 1/sqrt(N)*W;
