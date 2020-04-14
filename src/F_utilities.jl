@@ -1,5 +1,4 @@
-module F_utilities
-
+module F_utilities;
 using PyPlot;
 using LinearAlgebra;
 
@@ -9,7 +8,6 @@ function Print_matrix(title, matrix)
  colorbar()
  ylim(size(matrix,1),0)
 end
-export Print_matrix;
 
 function Build_Omega(N)
 #Build the matrix omega of dimension 2*N, that is for N sites.
@@ -21,7 +19,6 @@ function Build_Omega(N)
   Ω[(1:N).+N,(1:N).+N]  = Diagonal(-im*ν*ones(N));
   return Ω;
 end
-export Build_Omega;
 
 function Build_FxxTxp(N)
  FxxTxp = zeros(Int64, 2*N, 2*N);
@@ -31,7 +28,6 @@ function Build_FxxTxp(N)
  end
  return FxxTxp;
 end
-export Build_FxxTxp;
 
 function Build_FxpTxx(N)
  FxpTxx = zeros(Int64, 2*N, 2*N)
@@ -41,7 +37,6 @@ function Build_FxpTxx(N)
  end
  return FxpTxx;
 end
-export Build_FxpTxx;
 
 function Diag_real_skew(M, rand_perturbation::Int64=0)
  N = div(size(M,1),2);
@@ -49,7 +44,7 @@ function Diag_real_skew(M, rand_perturbation::Int64=0)
  #Random perturbation before forcing skew symmetrisation
  if (rand_perturbation != 0)
    if (rand_perturbation == 1)
-     random_M = 1*rand(2*N_f,2*N_f)*eps();
+     random_M = 1*rand(2*N,2*N)*eps();
      random_M = (random_M-random_M')/2.;
      M += random_M;
    end
@@ -59,10 +54,10 @@ function Diag_real_skew(M, rand_perturbation::Int64=0)
  #Random pertubation after the skew symmetrization
  if (rand_perturbation != 0)
    if (rand_perturbation == 2)    #Perturb the diagonal elements (loose perfect skew-symmetry)
-     M += diagm(rand(2*N_f)*eps())
+     M += diagm(rand(2*N)*eps())
    end
    if (rand_perturbation == 3)  #Perturb the whole matrix (loose perfect skew-symmetry)
-     random_M = 1*rand(2*N_f,2*N_f)*eps();
+     random_M = 1*rand(2*N,2*N)*eps();
      random_M = (random_M-random_M')/2.;
      M += random_M;
    end
@@ -109,12 +104,13 @@ function Diag_real_skew(M, rand_perturbation::Int64=0)
      end
      N = N-1;
  end
+   M_f = Schur_blocks_i;#M_temp;
+   O_f = Schur_ort_i;#real.(O_temp);
    M_f = M_temp;
    O_f = real.(O_temp);
 
  return M_f, O_f;
 end
-export Diag_real_skew;
 
 
 function Diag_h(M,rand_perturbation::Int64=0)
@@ -124,7 +120,7 @@ function Diag_h(M,rand_perturbation::Int64=0)
 
     Ω  = Build_Omega(N);
     M_temp = real(-im*Ω*M*Ω')
-    # M_temp += 0.01*rand(2*N_f,2*N_f);
+    # M_temp += 0.01*rand(2*N,2*N);
     M_temp = (M_temp-M_temp')/2.;
     #M_temp[1,1] += eps();
     M_temp, O = Diag_real_skew(M_temp,rand_perturbation)
@@ -134,7 +130,7 @@ function Diag_h(M,rand_perturbation::Int64=0)
     M_f = M_temp;
     U_f = Ω'*O*(F_xptxx')*Ω;
 
-    return real(M_f), U_f;
+    return U_f'*M*U_f, U_f;#real(M_f), U_f;
 end
 export Diag_h;
 
@@ -144,7 +140,6 @@ function Diag_gamma(Γ,rand_perturbation::Int64=0)
 
  return U'*Γ*U,U;#real(γ+0.5*eye(size(Γ,1))),U
 end
-export Diag_gamma;
 
 
 function Reduce_gamma(M, N_partition, first_index)
@@ -181,7 +176,6 @@ function Reduce_gamma(M, N_partition, first_index)
 
    return redgamma
 end
-export Reduce_gamma;
 
 function Inject_gamma(gamma, injection, first_index)
  dim_gamma     = div(size(gamma, 1),2);
@@ -219,7 +213,6 @@ function Inject_gamma(gamma, injection, first_index)
 
  return gamma
 end
-export Inject_gamma;
 
 function Eigenvalues_of_rho(M)
    N = convert(Int64, size(M,1)/2);
@@ -241,8 +234,6 @@ function Eigenvalues_of_rho(M)
 
    return evor;
 end
-export Eigenvalues_of_rho;
-
 
 function VN_entropy(M)
    N = convert(Int64, size(M,1));
@@ -259,7 +250,6 @@ function VN_entropy(M)
 
    return S;
 end
-export VN_entropy;
 
 
 function Purity(M)
@@ -275,7 +265,6 @@ function Purity(M)
 
    return purity
 end
-export Purity;
 
 function Contour(Γ)
   N = div(size(Γ,1),2);
@@ -312,21 +301,32 @@ function Contour(Γ)
 
   return Ent_Cont;
 end
-export Contour;
 
 function GS_gamma(D,U)
    N = div(size(D,1),2);
 
    Gamma_diag_base = zeros(Complex{Float64}, 2*N, 2*N);
-   for iiter=1:N
-       Gamma_diag_base[iiter+N, iiter+N] = 1;
-   end
-   Gamma = U*Gamma_diag_base*U';
+   # for iiter=1:N
+   #     Gamma_diag_base[iiter+N, iiter+N] = 1;
+   # end
+   # Gamma = U*Gamma_diag_base*U';
+   #
+   #
 
-   Gamma = (Gamma+(Gamma'))/2.
-   return Gamma;
+
+  for index=1:N
+    if real(D[index,index])<=0
+      Gamma_diag_base[index+N,index+N] = 1;
+    end
+    if real(D[index+N,index+N])<=0
+      Gamma_diag_base[index,index] = 1;
+    end
+  end
+  Gamma = U*Gamma_diag_base*U';
+  Gamma = (Gamma+(Gamma'))/2.
+
+  return Gamma;
 end
-export GS_gamma;
 
 function Thermal_fix_beta((Diag_H, U_H), beta)
  N_f   = convert(Int64, size(Diag_H,1)/2.);
@@ -342,7 +342,6 @@ function Thermal_fix_beta((Diag_H, U_H), beta)
 
  return gamma;
 end
-export Thermal_fix_beta;
 
 
 function Thermal_fix_energy((Diag_H, U_H,), conserved_energy)
@@ -380,7 +379,6 @@ function Thermal_fix_energy((Diag_H, U_H,), conserved_energy)
 
  return gamma, beta, abs(temp_energy-conserved_energy);
 end
-export Thermal_fix_energy;
 
 
 #Generate a random Hamiltonian with just nearest neighbour interactions
@@ -399,7 +397,6 @@ function Random_NNhamiltonian(N)
 
     return H;
 end
-export Random_NNhamiltonian;
 
 function Energy(Γ,(D,U))
    N_f = convert(Int64, size(Γ,1)/2.);
@@ -415,7 +412,6 @@ function Energy(Γ,(D,U))
 
    return real(energy);
 end
-export Energy;
 
 function Evolve(M,(D,U),t)
    N = div(size(M,1),2);
@@ -430,7 +426,6 @@ function Evolve(M,(D,U),t)
 
    return M_evolv;
 end
-export Evolve;
 
 function Product(Γ1,Γ2)
   N = div(size(Γ1, 1),2);
@@ -441,8 +436,6 @@ function Product(Γ1,Γ2)
   γp = I-(I-γ2)*inv(I+γ1*γ2)*(I-γ1);
   return (Ω'*(1/2)*(γp+I)*Ω);
 end
-export Product;
-
 
 function Evolve_imag(Γ,D,U,t)
    N = div(size(Γ,1),2);
@@ -455,8 +448,6 @@ function Evolve_imag(Γ,D,U,t)
 
    return Γ_evolv;
 end
-export Evolve_imag;
-
 
 function Build_hopping_hamiltonian(N,PBC=false);
   H = zeros(Float64, 2*N, 2*N);
@@ -471,7 +462,6 @@ function Build_hopping_hamiltonian(N,PBC=false);
 
   return H;
 end
-export Build_hopping_hamiltonian;
 
 function Build_Fourier_matrix(N)
   ω   = exp(-im*2*pi/N);
@@ -488,6 +478,5 @@ function Build_Fourier_matrix(N)
 
   return U_ω;
 end
-export Build_Fourier_matrix;
 
 end
