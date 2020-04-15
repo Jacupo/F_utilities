@@ -1,6 +1,22 @@
 module F_utilities;
 using PyPlot;
 using LinearAlgebra;
+using SpecialMatrices;
+
+function Circulant(cv)
+    cv = reverse(cv)
+    return Toeplitz(vcat(cv,cv[1:(end-1)]));
+end
+
+function Permute_rl(M,u,d)
+    temp = M[u,:];
+    M[u,:] = M[d,:];
+    M[d,:] = temp;
+    temp = M[:,u];
+    M[:,u] = M[:,d];
+    M[:,d] = temp;
+    return M;
+end
 
 function Print_matrix(title, matrix)
  figure(title)
@@ -8,6 +24,22 @@ function Print_matrix(title, matrix)
  colorbar()
  ylim(size(matrix,1),0)
 end
+
+function Print_complex_matrix(title, matrix)
+ fig = plt.figure(title,figsize=(11, 5), dpi=80)
+ plt.subplots_adjust(wspace=0, hspace=0)
+ ax12 = plt.subplot2grid((10,20), (0,0), colspan=10, rowspan=10);
+ ax12.set_title("Real part")
+ pcolormesh(real.(matrix))
+ colorbar()
+ ylim(size(matrix,1),0)
+ ax2m = plt.subplot2grid((10,20), (0,11), colspan=10, rowspan=10);
+ ax2m.set_title("Imaginary part")
+ pcolormesh(imag.(matrix))
+ colorbar()
+ ylim(size(matrix,1),0)
+end
+
 
 function Build_Omega(N)
 #Build the matrix omega of dimension 2*N, that is for N sites.
@@ -38,30 +70,44 @@ function Build_FxpTxx(N)
  return FxpTxx;
 end
 
-function Diag_real_skew(M, rand_perturbation::Int64=0)
+function Diag_real_skew(M, rand_perturbation::Int64=5)
  N = div(size(M,1),2);
 
  #Random perturbation before forcing skew symmetrisation
  if (rand_perturbation != 0)
    if (rand_perturbation == 1)
-     random_M = 1*rand(2*N,2*N)*eps();
+     random_M = rand(2*N,2*N)*eps();
+     random_M = (random_M-random_M')/2.;
+     M += random_M;
+   end
+   if (rand_perturbation == 4)
+     random_M = zeros(Complex{Float64},2N,2N);
+     random_M[1,N+2] = eps();
+     random_M[2,N+1] = -random_M[1,N+2];
+     random_M = (random_M-random_M')/2.;
+     M += random_M;
+   end
+   if (rand_perturbation == 5)
+     random_M = zeros(Complex{Float64},2N,2N);
+     random_M[1,2] = eps();
+     random_M[2,1] = -random_M[1,N+2];
      random_M = (random_M-random_M')/2.;
      M += random_M;
    end
  end
 
- M = real((M-M')/2.); #Force skew-symmetry
- #Random pertubation after the skew symmetrization
- if (rand_perturbation != 0)
-   if (rand_perturbation == 2)    #Perturb the diagonal elements (loose perfect skew-symmetry)
-     M += diagm(rand(2*N)*eps())
-   end
-   if (rand_perturbation == 3)  #Perturb the whole matrix (loose perfect skew-symmetry)
-     random_M = 1*rand(2*N,2*N)*eps();
-     random_M = (random_M-random_M')/2.;
-     M += random_M;
-   end
- end
+ # M = real((M-M')/2.); #Force skew-symmetry
+ # #Random pertubation after the skew symmetrization
+ # if (rand_perturbation != 0)
+ #   if (rand_perturbation == 2)    #Perturb the diagonal elements (loose perfect skew-symmetry)
+ #     M += diagm(rand(2*N)*eps())
+ #   end
+ #   if (rand_perturbation == 3)  #Perturb the whole matrix (loose perfect skew-symmetry)
+ #     random_M = 1*rand(2*N,2*N)*eps();
+ #     random_M = (random_M-random_M')/2.;
+ #     M += random_M;
+ #   end
+ # end
 
  Schur_object   = LinearAlgebra.schur(M);
 
@@ -104,8 +150,6 @@ function Diag_real_skew(M, rand_perturbation::Int64=0)
      end
      N = N-1;
  end
-   M_f = Schur_blocks_i;#M_temp;
-   O_f = Schur_ort_i;#real.(O_temp);
    M_f = M_temp;
    O_f = real.(O_temp);
 
@@ -315,12 +359,14 @@ function GS_gamma(D,U)
 
 
   for index=1:N
-    if real(D[index,index])<=0
+    if real(D[index,index])<0
       Gamma_diag_base[index+N,index+N] = 1;
-    end
-    if real(D[index+N,index+N])<=0
+    else
       Gamma_diag_base[index,index] = 1;
     end
+    # if real(D[index+N,index+N])<=0
+    #   Gamma_diag_base[index,index] = 1;
+    # end
   end
   Gamma = U*Gamma_diag_base*U';
   Gamma = (Gamma+(Gamma'))/2.
