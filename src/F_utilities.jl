@@ -174,9 +174,8 @@ function Diag_h(M,rand_perturbation::Int64=0)
     M_f = M_temp;
     U_f = Ω'*O*(F_xptxx')*Ω;
 
-    return U_f'*M*U_f, U_f;#real(M_f), U_f;
+    return real.(U_f'*M*U_f), U_f;#real(M_f), U_f;
 end
-export Diag_h;
 
 function Diag_gamma(Γ,rand_perturbation::Int64=0)
  Γ = (Γ+Γ')/2.;
