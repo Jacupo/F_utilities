@@ -524,4 +524,100 @@ function Build_Fourier_matrix(N)
   return U_ω;
 end
 
+
+function Build_A_TFI(N, θ, PBC)
+   M_A      = LinearAlgebra.diagm(-1 => ones(Float64,N-1), 0 => 2*cot(θ)*ones(Float64,N), 1 => ones(Float64,N-1));
+   M_A[1,N] = PBC;
+   M_A[N,1] = PBC;
+
+   return -1/2. .*M_A;
+end
+
+function Build_B_TFI(N, PBC)
+   M_B     = LinearAlgebra.diagm(-1 => ones(Float64,N-1), 0 => zeros(Float64,N), 1 => -ones(Float64,N-1));
+   M_B[1,N] = PBC;
+   M_B[N,1] = -PBC;
+
+   return -1/2. .*M_B;
+end
+
+function TFI_Hamiltonian(N, θ; PBC=+1)
+   A = Build_A_TFI(N, θ, PBC);
+   B = Build_B_TFI(N, PBC);
+
+   H_TFI                    = zeros(Float64, 2*N, 2*N);
+   H_TFI[1:N,1:N]           = -A;
+   H_TFI[((1:N).+N),1:N]    = -B;
+   H_TFI[1:N,(1:N).+N]      =  B;
+   H_TFI[(1:N).+N,(1:N).+N] =  A;
+
+   return H_TFI;
+end
+
+function Build_A_TFI_FIX(N, θ, PBC)
+   M_A      = LinearAlgebra.diagm(-1 => ones(Float64,N-1), 0 => 2*cot(θ)*ones(Float64,N), 1 => ones(Float64,N-1));
+   M_A[1,N] = PBC;
+   M_A[N,1] = PBC;
+   M_A[1,1] = 0;
+   M_A[1,2] = 0;
+   M_A[2,1] = 0;
+
+   return -1/2. .*M_A;
+end
+function Build_B_TFI_FIX(N, PBC)
+   M_B     = LinearAlgebra.diagm(-1 => ones(Float64,N-1), 0 => zeros(Float64,N), 1 => -ones(Float64,N-1));
+   M_B[1,N] = 0;
+   M_B[N,1] = -0;
+   M_B[1,2] = 0;
+   M_B[2,1] = -0;
+
+   return -1/2. .*M_B;
+end
+
+function TFI_Hamiltonian_FIX(N, θ; PBC=+1)
+   A = Build_A_TFI_FIX(N, θ, PBC);
+   B = Build_B_TFI_FIX(N, PBC);
+
+   H_TFI                    = zeros(Float64, 2*N, 2*N);
+   H_TFI[1:N,1:N]           = -A;
+   H_TFI[((1:N).+N),1:N]    = -B;
+   H_TFI[1:N,(1:N).+N]      =  B;
+   H_TFI[(1:N).+N,(1:N).+N] =  A;
+
+   return H_TFI;
+end
+
+function Project_diagonals(M4,off_diagonals)
+ #Return a 4-blocks matrix, in wich in each block only
+ #the first off_diagonals diagonal off diagonal are manteined
+ #the rest is set to 0.
+ #If off_diagonals=0 then it mantains only the diagonal of each block
+ N_f = convert(Int64, size(M4,1)/2.)
+ M_finale = zeros(Complex{Float64}, 2*N_f, 2*N_f)
+
+ for iiter=1:N_f
+   M_finale[iiter, iiter]          = M4[iiter, iiter]
+   M_finale[iiter+N_f, iiter]      = M4[iiter+N_f, iiter]
+   M_finale[iiter, iiter+N_f]      = M4[iiter, iiter+N_f]
+   M_finale[iiter+N_f, iiter+N_f]  = M4[iiter+N_f, iiter+N_f]
+   for jiter=1:off_diagonals
+     M_finale[iiter, mod(iiter+jiter-1,N_f)+1]          = M4[iiter, mod(iiter+jiter-1,N_f)+1]
+     M_finale[iiter+N_f, mod(iiter+jiter-1,N_f)+1]      = M4[iiter+N_f, mod(iiter+jiter-1,N_f)+1]
+     M_finale[iiter, mod(iiter+jiter-1,N_f)+1+N_f]      = M4[iiter, mod(iiter+jiter-1,N_f)+1+N_f]
+     M_finale[iiter+N_f, mod(iiter+jiter-1,N_f)+1+N_f]  = M4[iiter+N_f, mod(iiter+jiter-1,N_f)+1+N_f]
+
+     M_finale[iiter, mod(iiter-jiter-1,N_f)+1]          = M4[iiter, mod(iiter-jiter-1,N_f)+1]
+     M_finale[iiter+N_f, mod(iiter-jiter-1,N_f)+1]      = M4[iiter+N_f, mod(iiter-jiter-1,N_f)+1]
+     M_finale[iiter, mod(iiter-jiter-1,N_f)+1+N_f]      = M4[iiter, mod(iiter-jiter-1,N_f)+1+N_f]
+     M_finale[iiter+N_f, mod(iiter-jiter-1,N_f)+1+N_f]  = M4[iiter+N_f, mod(iiter-jiter-1,N_f)+1+N_f]
+   end
+ end
+ return M_finale
+end
+
+function Build_GDE(g_ferm_i,U_diag_f_Q)
+  return (U_diag_f_Q*Project_diagonals(U_diag_f_Q'*g_ferm_i*U_diag_f_Q,0)*U_diag_f_Q');;
+end
+
+
 end
