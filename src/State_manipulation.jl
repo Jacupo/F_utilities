@@ -1,3 +1,9 @@
+"""
+  Permute_rc(M,u,d)
+
+  Return the matric `M` where row `u` has been exchanged with row `d`,
+  and column `u`  has been exchanged with column `d`.
+"""
 function Permute_rc(M,u,d)
     temp = M[u,:];
     M[u,:] = M[d,:];
@@ -8,6 +14,12 @@ function Permute_rc(M,u,d)
     return M;
 end
 
+"""
+  Reduce_gamma(M, N_partition, first_index)
+
+  If `M` is a Dirac correlation matrix, returns the reduced density matrix of the system
+  `[first_index, first_index+1,...,first_index+N_partition-1]`.
+"""
 function Reduce_gamma(M, N_partition, first_index)
    N_f = div(size(M,1),2);
    first_index = first_index-1;
@@ -39,10 +51,15 @@ function Reduce_gamma(M, N_partition, first_index)
      redgamma[(dim_UL.+(1:periodic_dimension)).+N_partition,(1:dim_UL).+N_partition] = M[(1:periodic_dimension).+N_f,(first_index.+(1:dim_UL)).+N_f];
    end
 
-
    return redgamma
 end
 
+"""
+  Inject_gamma(gamma, injection, first_index)
+
+  If `gamma` is a Dirac correlation matrix, returns a new gamma such that
+  `Reduce_gamma(gamma, size(injection,1), first_index) = injection`.
+"""
 function Inject_gamma(gamma, injection, first_index)
  dim_gamma     = div(size(gamma, 1),2);
  dim_injection = div(size(injection, 1), 2);
@@ -80,11 +97,15 @@ function Inject_gamma(gamma, injection, first_index)
  return gamma
 end
 
+"""
+  Project_diagonals(M4,off_diagonals)
+
+  Returns a 4-blocks matrix, in wich in each block only
+  the first `off_diagonals` diagonals off diagonal are mantained
+  the rest is set to 0.
+  If `off_diagonals=0` then it mantains only the diagonal of each block
+"""
 function Project_diagonals(M4,off_diagonals)
- #Return a 4-blocks matrix, in wich in each block only
- #the first off_diagonals diagonal off diagonal are manteined
- #the rest is set to 0.
- #If off_diagonals=0 then it mantains only the diagonal of each block
  N_f = convert(Int64, size(M4,1)/2.)
  M_finale = zeros(Complex{Float64}, 2*N_f, 2*N_f)
 
@@ -108,6 +129,13 @@ function Project_diagonals(M4,off_diagonals)
  return M_finale
 end
 
-function Build_GDE(g_ferm_i,U_diag_f_Q)
-  return (U_diag_f_Q*Project_diagonals(U_diag_f_Q'*g_ferm_i*U_diag_f_Q,0)*U_diag_f_Q');;
+
+"""
+  Build_GDE(g,U)
+
+  If `g` is a Dirac correlation matrix, and `U` is a fermionic transormation that diagonalise
+  an f.q.h. `H`, `Build_GDE(g,U)` returns the Gaussian Diagonal Ensemble of G with respect to `H`.
+"""
+function Build_GDE(g,U)
+  return (U*Project_diagonals(U'*g*U,0)*U');;
 end

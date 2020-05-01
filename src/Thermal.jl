@@ -1,3 +1,13 @@
+"""
+  Thermal_fix_beta(Diag_H, U_H, beta)
+
+  If `Diag_h` is a diagonalised f.q.h., `U_H` is the fermionic transformation
+  such that `Diag_h=U_H*H*U_H'`, then `Thermal_fix_beta(Diag_H, U_H, beta)` returns
+  the thermal state at themperature `beta` of `H`.
+"""
+function Thermal_fix_beta(Diag_H, U_H, beta)
+  return Thermal_fix_beta((Diag_H, U_H), beta);
+end
 function Thermal_fix_beta((Diag_H, U_H), beta)
  N_f   = convert(Int64, size(Diag_H,1)/2.);
 
@@ -13,8 +23,17 @@ function Thermal_fix_beta((Diag_H, U_H), beta)
  return gamma;
 end
 
+"""
+  Thermal_fix_energy(Diag_H, U_H, conserved_energy)
 
-function Thermal_fix_energy((Diag_H, U_H,), conserved_energy)
+  If `Diag_h` is a diagonalised f.q.h., `U_H` is the fermionic transformation
+  such that `Diag_h=U_H*H*U_H'`, then `Thermal_fix_beta(Diag_H, U_H, beta)` returns
+  the thermal state of `H` with energy `conserved_energy` w.r.t. `H`.
+"""
+function Thermal_fix_energy((Diag_H, U_H), conserved_energy)
+  return Thermal_fix_energy(Diag_H, U_H, conserved_energy);
+end
+function Thermal_fix_energy((Diag_H, U_H), conserved_energy)
  N_f   = convert(Int64, size(Diag_H,1)/2.);
  a     = 0;
  b     = 100;
@@ -50,6 +69,13 @@ function Thermal_fix_energy((Diag_H, U_H,), conserved_energy)
  return gamma, beta, abs(temp_energy-conserved_energy);
 end
 
+"""
+  Product(Γ1,Γ2)
+
+  If `Γ1` and `Γ2` are the Dirac correlation matrices of two f.g.s. ρ1 and ρ2,
+  `Product(Γ1,Γ2)` returns the Dirac correalation matrix of the state ρ=ρ1*ρ2/N
+  where N is the normalisation.
+"""
 function Product(Γ1,Γ2)
   N = div(size(Γ1, 1),2);
 
@@ -60,6 +86,13 @@ function Product(Γ1,Γ2)
   return (Ω'*(1/2)*(γp+I)*Ω);
 end
 
+"""
+  Evolve_imag(Γ,D,U,t)
+
+  If Γ is a Dirac correlation matrix,`D` is a diagonalised f.q.h., `U` is the fermionic transformation
+  such that `D=U*H*U'`, then `Evolve_imag(Γ,D,U,t)` returns the correlation matrix of the imaginary time
+  evolution of `Γ` with `H` at time `t`.  
+"""
 function Evolve_imag(Γ,D,U,t)
    N = div(size(Γ,1),2);
 

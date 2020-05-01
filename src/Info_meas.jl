@@ -4,9 +4,7 @@ function Eigenvalues_of_rho(M)
    evor = ones(Float64, 2^N)
 
    D,U = Diag_gamma((M+M')/2.)
-
-
-
+   
    for iiter=1:2^N
        index = iiter-1;
        for jiter=1:N
