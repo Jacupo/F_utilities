@@ -8,6 +8,6 @@ module F_utilities;
   include("Thermal.jl")
   include("Info_meas.jl")
   include("Printing.jl")
-  include("Special_matrices.jl")
+  include("Build_matrices.jl")
 
 end
