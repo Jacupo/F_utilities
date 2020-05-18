@@ -1,4 +1,4 @@
-function Diag_real_skew(M, rand_perturbation::Int64=5)
+function Diag_real_skew(M, rand_perturbation::Int64=0)
 N = div(size(M,1),2);
 
 #Random perturbation before forcing skew symmetrisation
@@ -17,10 +17,9 @@ if (rand_perturbation != 0)
  end
  if (rand_perturbation == 5)
    random_M = zeros(Complex{Float64},2N,2N);
-   random_M[1,2] = eps();
-   random_M[2,1] = -random_M[1,N+2];
-   random_M = (random_M-random_M')/2.;
-   M += random_M;
+   r =  eps();
+   M[1,2] += r;
+   M[2,1] -= r;
  end
 end
 

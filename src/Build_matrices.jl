@@ -49,7 +49,7 @@
      return H;
    end
 
-  function Build_hopping_hamiltonian(N,PBC=false);
+  function Build_hopping_hamiltonian(N;PBC=false);
     H = zeros(Float64, 2*N, 2*N);
     A = zeros(Float64, N, N);
     A[1:N,1:N] = 1/2*Tridiagonal(ones(Int64,N-1),zeros(Int64,N),ones(Int64,N-1));
