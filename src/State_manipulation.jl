@@ -140,13 +140,13 @@ function Build_GDE(g,U)
   return (U*Project_diagonals(U'*g*U,0)*U');;
 end
 
-```
+"""
   Diagonalise_block(Γ,starting_site, dimension)
 
   If `Γ` is a Dirac correlation matrix, return the correlation matrix `Γ_bd` with the subsystem
   [starting_site,starting_site+1,...,starting_site+dimension-1] diagonalised and the fermionic
   transformation `U` that move to that basis: `Γ_bd = U*Γ*U'`;
-```
+"""
 function diagonalise_block(γi, starting_site, dimension)
  γ = copy(γi)
  dimension = convert(Int64, dimension)
@@ -160,34 +160,35 @@ function diagonalise_block(γi, starting_site, dimension)
 end
 
 
-```
+"""
     RBD(Γ,m)
 
-    If `Γ` is a Dirac correlation matrix, return the correlation matrix of the state
-    with bond dimension `m`.
-```
-function RBD(Lambda,m::Int64)
-  Γ = deepcopy(Lambda)
+    If `Γ` is a Dirac correlation matrix, return the correlation matrix `Γ_RBD`
+    of the state with bond dimension `m`.
+"""
+function RBD(Γ::Array{Number,2},m::Int64)
+  Γ_RBD = deepcopy(Γ)
+  N = div(size(Γ_RBD,1),2);
   U = diagm(ones(Complex{Float64},2*N));
   for i=1:(N-m)
-    Γ, Ut = Fu.diagonalise_block(Γ,i,m+1);
+    Γ_RBD, Ut = Fu.diagonalise_block(Γ_RBD,i,m+1);
     U = U*Ut;
-    Γ[i,:]      .= 0;
-    Γ[:,i]      .= 0;
-    Γ[i+N,:]    .= 0;
-    Γ[:,i+N]    .= 0;
-    Γ[i+N,i+N]  = 1;
+    Γ_RBD[i,:]      .= 0;
+    Γ_RBD[:,i]      .= 0;
+    Γ_RBD[i+N,:]    .= 0;
+    Γ_RBD[:,i+N]    .= 0;
+    Γ_RBD[i+N,i+N]  = 1;
   end
   for i=1:(m)
-    Γ, Ut = Fu.diagonalise_block(Γ,N-m+i,m-i+1);
+    Γ_RBD, Ut = Fu.diagonalise_block(Γ_RBD,N-m+i,m-i+1);
     U = U*Ut;
-    Γ[N-m+i,:]      .= 0;
-    Γ[:,N-m+i]      .= 0;
-    Γ[N-m+i+N,:]    .= 0;
-    Γ[:,N-m+i+N]    .= 0;
-    Γ[N-m+i+N,N-m+i+N]  = 1;
+    Γ_RBD[N-m+i,:]      .= 0;
+    Γ_RBD[:,N-m+i]      .= 0;
+    Γ_RBD[N-m+i+N,:]    .= 0;
+    Γ_RBD[:,N-m+i+N]    .= 0;
+    Γ_RBD[N-m+i+N,N-m+i+N]  = 1;
   end
-  Γ = U*Γ*U';
+  Γ_RBD = U*Γ_RBD*U';
 
-  return Γ;
+  return Γ_RBD;
 end
