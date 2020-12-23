@@ -141,3 +141,61 @@
 
      return H_TFI;
   end
+
+
+
+
+
+
+
+  function Build_A_JXJY(Jx, Jy, lambdas)
+     dimension = size(Jx, 1);
+     M_A       = zeros(Float64, dimension, dimension)
+     for iiter=2:dimension-1
+         M_A[iiter, iiter]   = -2*lambdas[iiter];
+         M_A[iiter, iiter-1] = -(Jx[iiter-1]+Jy[iiter-1]);
+         M_A[iiter, iiter+1] = -(Jx[iiter]+Jy[iiter]);
+     end
+     M_A[1,1]         = -2*lambdas[1];#
+     M_A[1,2]         = -(Jx[1]+Jy[1]);#
+
+     M_A[1,dimension] = -(Jx[dimension]+Jy[dimension]);#
+     M_A[dimension,1] = -(Jx[dimension]+Jy[dimension]);
+     M_A[dimension, dimension-1] = -(Jx[dimension-1] + Jy[dimension-1]);   #
+     M_A[dimension,dimension]    = -2*lambdas[dimension];#
+
+     return M_A
+  end
+
+
+
+  function Build_B_JXJY(Jx, Jy)
+     dimension = size(Jx, 1);
+     M_B       = zeros(Float64, dimension, dimension)
+     for iiter=2:dimension-1
+         M_B[iiter, iiter-1] = -(Jx[iiter-1]-Jy[iiter-1]);
+         M_B[iiter, iiter+1] = Jx[iiter]-Jy[iiter];
+     end
+     M_B[1,2]         = Jx[1]-Jy[1];
+
+     M_B[1,dimension] = -(Jx[dimension]-Jy[dimension]);#
+     M_B[dimension,1] = (Jx[dimension]-Jy[dimension]);#
+
+     M_B[dimension, dimension-1] = -(Jx[dimension-1]-Jy[dimension-1]);
+
+     return M_B
+  end
+
+
+  function JXJY_Hamiltonian(N,Jx,Jy,lambda)
+     A = 0.5*Build_A_JXJY(Jx,Jy,lambda);
+     B = 0.5*Build_B_JXJY(Jx,Jy);
+
+     H_JXJY                          = zeros(Float64, 2*N, 2*N);
+     H_JXJY[1:N,1:N]             = -A;
+     H_JXJY[((1:N).+N),1:N]       = -B;
+     H_JXJY[1:N,(1:N).+N]       =  B;
+     H_JXJY[(1:N).+N,(1:N).+N] =  A;
+
+     return H_JXJY;
+  end
