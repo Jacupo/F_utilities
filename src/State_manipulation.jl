@@ -166,7 +166,7 @@ end
     If `Γ` is a Dirac correlation matrix, return the correlation matrix `Γ_RBD`
     of the state with bond dimension `m`.
 """
-function RBD(Γ::Array{Number,2},m::Int64)
+function RBD(Γ,m::Int64)
   Γ_RBD = deepcopy(Γ)
   N = div(size(Γ_RBD,1),2);
   U = diagm(ones(Complex{Float64},2*N));
