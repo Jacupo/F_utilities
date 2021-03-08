@@ -9,3 +9,4 @@ pkg> add https://github.com/Jacupo/F_utilities
 
 ## Documentation
 The documentation can be found at
+https://github.com/Jacupo/F_utilities-documentation/blob/master/main.pdf
