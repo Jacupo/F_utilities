@@ -107,6 +107,10 @@ end
 """
 function Project_diagonals(M4,off_diagonals)
  N_f = convert(Int64, size(M4,1)/2.)
+ if off_diagonals==0
+   return diagm(diag(M4))
+ end 
+  
  M_finale = zeros(Complex{Float64}, 2*N_f, 2*N_f)
 
  for iiter=1:N_f
