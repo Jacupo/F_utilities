@@ -171,7 +171,7 @@ function RBD(Γ,m::Int64)
   N = div(size(Γ_RBD,1),2);
   U = diagm(ones(Complex{Float64},2*N));
   for i=1:(N-m)
-    Γ_RBD, Ut = Fu.diagonalise_block(Γ_RBD,i,m+1);
+    Γ_RBD, Ut = diagonalise_block(Γ_RBD,i,m+1);
     U = U*Ut;
     Γ_RBD[i,:]      .= 0;
     Γ_RBD[:,i]      .= 0;
@@ -180,7 +180,7 @@ function RBD(Γ,m::Int64)
     Γ_RBD[i+N,i+N]  = 1;
   end
   for i=1:(m)
-    Γ_RBD, Ut = Fu.diagonalise_block(Γ_RBD,N-m+i,m-i+1);
+    Γ_RBD, Ut = diagonalise_block(Γ_RBD,N-m+i,m-i+1);
     U = U*Ut;
     Γ_RBD[N-m+i,:]      .= 0;
     Γ_RBD[:,N-m+i]      .= 0;
