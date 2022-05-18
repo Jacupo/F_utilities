@@ -9,5 +9,6 @@ module F_utilities;
   include("Info_meas.jl")
   include("Printing.jl")
   include("Build_matrices.jl")
+  include("Supplemental.jl")
 
 end
