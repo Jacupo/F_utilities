@@ -4,11 +4,11 @@ function Eigenvalues_of_rho(M)
    evor = ones(Float64, 2^N)
 
    D,U = Diag_gamma((M+M')/2.)
-   
+
    for iiter=1:2^N
        index = iiter-1;
        for jiter=1:N
-           evor[iiter] = evor[iiter]*round((mod(index-1,2)*D[jiter,jiter]+(1-mod(index-1,2))*(D[jiter+N,jiter+N])),18)
+           evor[iiter] = evor[iiter]*round((mod(index-1,2)*D[jiter,jiter]+(1-mod(index-1,2))*(D[jiter+N,jiter+N])),digits=16)
            index -= mod(index,2);
            index = index/2;
        end
