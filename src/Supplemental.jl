@@ -54,9 +54,9 @@ end
 
 """
   Biggest_eig_rho(M, n)
-  Return the first 2^(n-1) eigenvalues of the density matrix rho described by the correlation matrix 'M'.
-  In the SciPost notation, it computes the eigenvalues vec{x}=Binary(0),Binary(1),dots,Binary(2^(n-1)).
-  The first 'n' eigenvalues are assured to be the first 'n' biggest eigenvalues of rho.
+  Return the first 2^n-1 eigenvalues of the density matrix rho described by the correlation matrix 'M'.
+  In the SciPost notation, it computes the eigenvalues vec{x}=Binary(0),Binary(1),dots,Binary(2^n-1).
+  The first 'n-1' eigenvalues are assured to be the first 'n-1' biggest eigenvalues of rho.
 
 """
 function Biggest_eig_rho(M,n_gaps)
