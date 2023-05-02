@@ -3,7 +3,7 @@
 ## Installation
 Enter the Pkg REPL by pressing `]` from the Julia REPL.
 ```
-pkg> add  https://github.com/JuliaMatrices/SpecialMatrices.jl
+pkg> add SpecialMatrices
 pkg> add https://github.com/Jacupo/F_utilities
 ```
 
