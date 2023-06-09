@@ -1,86 +1,82 @@
 function Diag_real_skew(M, rand_perturbation::Int64=0)
-N = div(size(M,1),2);
+  N = div(size(M, 1), 2)
 
-#Random perturbation before forcing skew symmetrisation
-if (rand_perturbation != 0)
- if (rand_perturbation == 1)
-   random_M = rand(2*N,2*N)*eps();
-   random_M = (random_M-random_M')/2.;
-   M += random_M;
- end
- if (rand_perturbation == 4)
-   random_M = zeros(Complex{Float64},2N,2N);
-   random_M[1,N+2] = eps();
-   random_M[2,N+1] = -random_M[1,N+2];
-   random_M = (random_M-random_M')/2.;
-   M += random_M;
- end
- if (rand_perturbation == 5)
-   random_M = zeros(Complex{Float64},2N,2N);
-   r =  eps();
-   M[1,2] += r;
-   M[2,1] -= r;
- end
-end
+  # Random perturbation before forcing skew symmetrisation
+  if (rand_perturbation != 0)
+    if (rand_perturbation == 1)
+        random_M = rand(2N, 2N) * eps()
+        random_M = (random_M - random_M') / 2.0
+        M += random_M
+      end
+      if (rand_perturbation == 4)
+        random_M = zeros(Complex{Float64}, 2N, 2N)
+        random_M[1, N+2] = eps()
+        random_M[2, N+1] = -random_M[1, N+2]
+        random_M = (random_M - random_M') / 2.0
+        M += random_M
+      end
+      if (rand_perturbation == 5)
+        random_M = zeros(Complex{Float64}, 2N, 2N)
+        r = eps()
+        M[1, 2] += r
+        M[2, 1] -= r
+      end
+  end
 
-# M = real((M-M')/2.); #Force skew-symmetry
-# #Random pertubation after the skew symmetrization
-# if (rand_perturbation != 0)
-#   if (rand_perturbation == 2)    #Perturb the diagonal elements (loose perfect skew-symmetry)
-#     M += diagm(rand(2*N)*eps())
-#   end
-#   if (rand_perturbation == 3)  #Perturb the whole matrix (loose perfect skew-symmetry)
-#     random_M = 1*rand(2*N,2*N)*eps();
-#     random_M = (random_M-random_M')/2.;
-#     M += random_M;
-#   end
-# end
+  # M = real((M-M')/2.); #Force skew-symmetry
+  # #Random pertubation after the skew symmetrization
+  # if (rand_perturbation != 0)
+  #   if (rand_perturbation == 2)    #Perturb the diagonal elements (loose perfect skew-symmetry)
+  #     M += diagm(rand(2*N)*eps())
+  #   end
+  #   if (rand_perturbation == 3)  #Perturb the whole matrix (loose perfect skew-symmetry)
+  #     random_M = 1*rand(2*N,2*N)*eps();
+  #     random_M = (random_M-random_M')/2.;
+  #     M += random_M;
+  #   end
+  # end
 
-Schur_object   = LinearAlgebra.schur(M);
+  Schur_object = LinearAlgebra.schur(M)
 
-Schur_ort_i    = Schur_object.vectors;
-Schur_blocks_i = Schur_object.Schur;
+  Schur_ort_i = Schur_object.vectors
+  Schur_blocks_i = Schur_object.Schur
 
-Schur_adjust = zeros(Int64, 2*N, 2*N);
-for iiter=1:N
- if (Schur_blocks_i[2*iiter,2*iiter-1] >= 0.)
-   Schur_adjust[2*iiter-1, 2*iiter] = 1;
-   Schur_adjust[2*iiter, 2*iiter-1] = 1;
- else
-   Schur_adjust[2*iiter-1,2*iiter-1] = 1;
-   Schur_adjust[2*iiter, 2*iiter]    = 1;
- end
-end
+  # Reorder so that all 2x2 blocks have positive value in top right, accounting for 1x1 blocks.
+  swap_perm = Vector{Int64}(undef, 0)
+  sizehint!(swap_perm, 2N)
+  iiter = 1
+  while iiter < 2N
+      if abs(Schur_blocks_i[iiter, iiter]) >= abs(Schur_blocks_i[iiter+1, iiter]) # alternative: s_b_i[i+1, i] == 0
+          # We have a 1x1 block
+          pushfirst!(swap_perm, iiter)
+          iiter += 1
+      elseif (Schur_blocks_i[iiter + 1, iiter] >= 0.0)
+          # Flipped 2x2 block
+          push!(swap_perm, iiter + 1, iiter)
+          iiter += 2
+      else
+          # Unflipped 2x2 block
+          push!(swap_perm, iiter, iiter + 1)
+          iiter += 2
+      end
+  end
+  if iiter == 2N  # catch the final 1x1 block if it exists
+    push!(swap_perm, 2N)
+  end
+  
+  M_temp = Schur_blocks_i[swap_perm, swap_perm]
+  O_temp = Schur_ort_i[:, swap_perm]
 
-M_temp   = Schur_adjust*Schur_blocks_i*Schur_adjust';
-O_temp   = (Schur_ort_i*Schur_adjust);
+  # Sort the blocks, λ_1>=λ_2>=...>=λ_N with λ_1 the coefficient in the upper left block
+  psort = sortperm(diag(M_temp, 1)[begin:2:end], rev=true)
+  full_psort = zeros(Int64, 2N)
+  full_psort[begin:2:end] .= 2 .* psort .- 1
+  full_psort[begin + 1:2:end] .= 2 .* psort
 
-#Sort the blocks, λ_1>=λ_2>=...>=λ_N with λ_1 the coefficient in the upper left block
-not_sorted = true;
-while not_sorted
-   not_sorted = false;
-   for jiter=2:(N)
-     if (M_temp[2*(jiter-1)-1, 2*(jiter-1)] <= M_temp[2*jiter-1, 2*jiter])
-       not_sorted = true;
-       temp = M_temp[2*(jiter-1)-1, 2*(jiter-1)];
-       M_temp[2*(jiter-1)-1, 2*(jiter-1)] = M_temp[2*jiter-1, 2*jiter];
-       M_temp[2*(jiter-1), 2*(jiter-1)-1] = -M_temp[2*(jiter-1)-1, 2*(jiter-1)];
-       M_temp[2*jiter-1, 2*jiter] = temp;
-       M_temp[2*jiter, 2*jiter-1] = -temp;
-       temp1 = O_temp[:,2*(jiter-1)];
-       O_temp[:,2*(jiter-1)] = O_temp[:,2*jiter];
-       O_temp[:,2*jiter] = temp1;
-       temp1 = O_temp[:,2*(jiter-1)-1];
-       O_temp[:,2*(jiter-1)-1] = O_temp[:,2*jiter-1];
-       O_temp[:,2*jiter-1] = temp1;
-     end
-   end
-   N = N-1;
-end
- M_f = M_temp;
- O_f = real.(O_temp);
+  M_f = M_temp[full_psort, full_psort]
+  O_f = real(O_temp[:, full_psort])
 
-return M_f, O_f;
+  return M_f, O_f
 end
 
 
