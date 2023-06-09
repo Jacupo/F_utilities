@@ -47,7 +47,7 @@ function Diag_real_skew(M, rand_perturbation::Int64=0)
   iiter = 1
   while iiter < 2N
       if abs(Schur_blocks_i[iiter, iiter]) >= abs(Schur_blocks_i[iiter+1, iiter]) # alternative: s_b_i[i+1, i] == 0
-          # We have a 1x1 block
+          # We have a 1x1 block - move it to the front. These always come in pairs, but not always sequentially.
           pushfirst!(swap_perm, iiter)
           iiter += 1
       elseif (Schur_blocks_i[iiter + 1, iiter] >= 0.0)
@@ -61,7 +61,7 @@ function Diag_real_skew(M, rand_perturbation::Int64=0)
       end
   end
   if iiter == 2N  # catch the final 1x1 block if it exists
-    push!(swap_perm, 2N)
+    pushfirst!(swap_perm, 2N)
   end
   
   M_temp = Schur_blocks_i[swap_perm, swap_perm]
