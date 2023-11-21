@@ -5,7 +5,7 @@ using LinearAlgebra;
 const Fu = F_utilities;
 
 N   = 10;
-theta   = pi/8;
+theta   = pi/4;
 
 H_APBC          = Fu.TFI_Hamiltonian(N, theta; PBC=-1);
 HD_APBC, U_APBC = Fu.Diag_h(H_APBC);
